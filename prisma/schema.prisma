@@ -1,0 +1,146 @@
+// prisma/schema.prisma
+
+// ─── GENERATOR ─────────────────────────────────────────────
+// Tells Prisma: "generate TypeScript code I can use in my app"
+generator client {
+  provider = "prisma-client"
+  // "prisma-client" is the Prisma 7 value
+  // Old versions used "prisma-client-js" — that no longer works in Prisma 7
+
+  output = "../generated/prisma"
+  // Where to put the generated TypeScript client code
+  // "../generated/prisma" means: go up from prisma/ folder to root, then generated/prisma/
+  // Result: generated/prisma/ sits at your project root
+}
+
+// ─── DATASOURCE ────────────────────────────────────────────
+// Tells Prisma: "which type of database are we using?"
+datasource db {
+  provider = "postgresql"
+  // No url here in Prisma 7
+  // The connection URL lives in prisma.config.ts — already set up ✅
+}
+
+// ─── ENUMS ─────────────────────────────────────────────────
+// An enum = a fixed list of allowed values for a field
+// Like a dropdown menu — only these exact values are valid
+// If you try to save role = "SUPERUSER" the database rejects it
+
+enum Role {
+  ADMIN // Can see and do everything
+  USER // Normal logged-in user
+  GUEST // Limited access
+}
+
+// ─── MODELS ────────────────────────────────────────────────
+// A model = a table in your database
+// Each field = a column in that table
+// Each saved user/token/session = one row in the table
+
+// THE USER TABLE
+// One row = one registered person
+model User {
+  id String @id @default(cuid())
+  // id        = column name
+  // String    = text data type
+  // @id       = this is the PRIMARY KEY — the unique identifier for every row
+  // @default(cuid()) = auto-generate a unique ID like "clx4k2m0j0000abc123"
+  //                    cuid = collision-resistant unique id
+
+  email String @unique
+  // @unique   = no two users can share the same email
+  // database enforces this — it will reject duplicate emails
+
+  password String
+  // Never stored as plain text
+  // Always stored as a bcrypt hash like "$2b$12$eW8Rq..."
+
+  role Role @default(USER)
+  // Uses our Role enum above
+  // Every new account starts as USER automatically
+
+  isVerified Boolean @default(false)
+  // Boolean   = only true or false
+  // Starts as false — user must verify email with OTP before they can log in
+
+  tokenVersion Int @default(0)
+  // Int       = whole number
+  // Starts at 0
+  // When we increment this (0→1), ALL existing tokens for this user become invalid
+  // This is how "logout from all devices at once" works
+
+  createdAt DateTime @default(now())
+  // DateTime  = a date + time value
+  // @default(now()) = automatically set to the exact moment the row was created
+
+  updatedAt DateTime @updatedAt
+  // @updatedAt = automatically updates to current time whenever this row changes
+
+  // RELATIONS
+  // These lines don't create columns in the User table
+  // They tell Prisma "one user connects to many of these"
+  // Like saying: one person can have many library books checked out
+  refreshTokens RefreshToken[] // [] means "many"
+  sessions      Session[]
+  otps          Otp[]
+}
+
+// THE REFRESH TOKEN TABLE
+// One row = one "stay logged in" token for one device
+model RefreshToken {
+  id String @id @default(cuid())
+
+  token String @unique
+  // The actual token string — long random text
+  // Must be unique — no two identical tokens allowed
+
+  userId String
+  // Stores the id of the User who owns this token
+  // This is the "foreign key" — it links this row to a row in the User table
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // @relation = "the userId column here points to the id column in User table"
+  // onDelete: Cascade = if the User is deleted, automatically delete their tokens too
+  // Without this, deleting a user would leave orphaned tokens in the database
+
+  expiresAt DateTime
+  // After this date/time, the token is no longer valid
+
+  createdAt DateTime @default(now())
+}
+
+// THE SESSION TABLE
+// One row = one active logged-in device
+// e.g., "Chrome on Windows", "Safari on iPhone"
+model Session {
+  id         String @id @default(cuid())
+  userId     String
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceInfo String
+  // What device/browser is this session from
+  // We read this from the User-Agent header when they log in
+
+  lastSeen DateTime @default(now())
+  // When did this device last make a request?
+  // Useful for showing users "last active 2 hours ago"
+
+  createdAt DateTime @default(now())
+}
+
+// THE OTP TABLE
+// One row = one verification code email we sent
+model Otp {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  userId String
+  // Which user this OTP belongs to
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Links back to the User table
+  // onDelete: Cascade = if user is deleted, delete their OTPs too
+}
