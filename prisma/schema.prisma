@@ -7,10 +7,10 @@ generator client {
   // "prisma-client" is the Prisma 7 value
   // Old versions used "prisma-client-js" — that no longer works in Prisma 7
 
-  output = "../generated/prisma"
+output = "../src/generated/prisma"
   // Where to put the generated TypeScript client code
-  // "../generated/prisma" means: go up from prisma/ folder to root, then generated/prisma/
-  // Result: generated/prisma/ sits at your project root
+  // "../generated/prisma" means: go up from prisma/ folder to src, then generated/prisma/
+  // Result: generated/prisma/ sits at your project src folder
 }
 
 // ─── DATASOURCE ────────────────────────────────────────────
