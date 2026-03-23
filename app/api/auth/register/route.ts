@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     // Extra Validation - is the mail formate Valid ?
     //.include("@") is simply check - a real email must have  @
 
-    if (!email.include("@")) {
+    if (!email.includes("@")) {
       return Response.json(
         { error: "Invalid email formate " },
         { status: 400 },
