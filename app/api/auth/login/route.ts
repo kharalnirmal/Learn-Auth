@@ -128,11 +128,7 @@ export async function POST(request: Request) {
 
     response.headers.append(
       "Set-Cookie",
-      `access_token=${accessToken};
-        HttpOnly;
-        Path=/;
-        Max-Age=900
-        SameSite=strict`,
+      `access_token=${accessToken}; HttpOnly; Path=/;  Max-Age=900; SameStrict=Strict`,
 
       // access_token=...  the cookie name and value
       // HttpOnly          JS cannot read this — only browser sends it
