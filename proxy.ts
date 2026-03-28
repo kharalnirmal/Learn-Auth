@@ -19,6 +19,7 @@ export function proxy(request: NextRequest) {
   // Try to read the access_token cookie from the request
   const token = request.cookies.get("access_token")?.value;
   // .cookies        = all cookies sent with this request
+  // cleaner than parsing the cookie header manually
   // .get('access_token') = find the cookie named 'access_token'
   // ?.              = optional chaining — if cookie doesn't exist,
   //                   don't crash, just return undefined
@@ -52,9 +53,25 @@ export function proxy(request: NextRequest) {
         return NextResponse.redirect(new URL("/dashboard", request.url));
       }
     }
+    // ATTACH USER INFO TO REQUEST HEADERS
+    // so pages can know who the user is without
+    // hitting the database again
+    const requestHeaders = new Headers(request.headers);
+    // create a copy of existing headers
+    // we don't want to modify the original
+
+    requestHeaders.set("x-user-id", payload.userId);
+    requestHeaders.set("x-user-role", payload.role);
+    requestHeaders.set("x-user-email", payload.email);
+    // x- prefix = custom header convention
+    // means "this is our own custom header, not a standard one"
 
     // everything checks out — let the request through
-    return NextResponse.next();
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
   } catch {
     // verifyAccessToken threw an error
     // means: token is expired OR was tampered with
