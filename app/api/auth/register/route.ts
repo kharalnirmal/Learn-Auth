@@ -1,3 +1,4 @@
+import { sendOtpEmail } from "@/lib/mailer";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
@@ -123,9 +124,12 @@ export async function POST(request: Request) {
     // ── STEP 8: SEND OTP EMAIL ─────────────────────────────
     // We'll add real email sending in Phase 8
     // For now, log it to console so we can test
-    console.log(`OTP for ${email}: ${otpCode}`);
+    //! console.log(`OTP for ${email}: ${otpCode}`);
     // In development, you'll see this in your terminal
     // e.g., "OTP for john@example.com: 482910"
+
+    //after we add real email sending, the user will get an email with the OTP instead of it being logged to the terminal
+    await sendOtpEmail(email, otpCode);
 
     return Response.json(
       {
