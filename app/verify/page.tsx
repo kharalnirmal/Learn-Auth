@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function VerifyPage() {
+  return (
+    <Suspense fallback={<VerifyPageFallback />}>
+      <VerifyPageContent />
+    </Suspense>
+  );
+}
+
+function VerifyPageContent() {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -159,6 +167,17 @@ export default function VerifyPage() {
           </p>
         </div>
       </div>
+    </div>
+  );
+}
+
+function VerifyPageFallback() {
+  return (
+    <div
+      className="flex justify-center items-center min-h-screen"
+      style={{ background: "#F7F5FF" }}
+    >
+      <p style={{ color: "#534AB7" }}>Loading verify page...</p>
     </div>
   );
 }
