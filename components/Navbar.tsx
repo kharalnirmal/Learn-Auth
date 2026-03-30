@@ -14,28 +14,40 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-white px-8 py-4 border-b">
+    <nav
+      className="px-6 py-4 border-b"
+      style={{ background: "white", borderColor: "#E5E7EB" }}
+    >
       <div className="flex justify-between items-center mx-auto max-w-2xl">
-        {/* LOGO */}
-        <Link href="/" className="font-bold text-indigo-600 text-xl">
+        <Link
+          href="/"
+          className="font-bold text-xl"
+          style={{ color: "#7F77DD" }}
+        >
           Auth Master
         </Link>
 
-        {/* LINKS */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
           <Link
             href="/dashboard"
-            className="text-gray-600 hover:text-gray-900 text-sm"
+            className="hover:opacity-70 font-medium text-sm transition-opacity"
+            style={{ color: "#534AB7" }}
           >
             Dashboard
           </Link>
           <Link
             href="/admin"
-            className="text-gray-600 hover:text-gray-900 text-sm"
+            className="hover:opacity-70 font-medium text-sm transition-opacity"
+            style={{ color: "#534AB7" }}
           >
             Admin
           </Link>
-          <Button variant="outline" size="sm" onClick={handleLogout}>
+          <Button
+            onClick={handleLogout}
+            size="sm"
+            className="rounded-xl"
+            style={{ background: "#7F77DD", color: "white", border: "none" }}
+          >
             Logout
           </Button>
         </div>

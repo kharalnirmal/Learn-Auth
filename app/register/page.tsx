@@ -1,157 +1,155 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
 
-import React, { useState } from "react";
-
-const RegisterPage = () => {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [error, setError] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
-  // these 4 pieces of state cover everything:
-  // email    = what user typed in email field
-  // password = what user typed in password field
-  // loading  = is the request in progress? (show spinner)
-  // error    = any error message to show
-
+export default function RegisterPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
-  // router.push('/verify') = navigate to verify page]
-
-  // ── SUBMIT HANDLER ──────────────────────────────────────
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // prevent page reload
-    setLoading(true); // show spinner
-    setError(""); // clear previous error
-
+    e.preventDefault();
+    setLoading(true);
+    setError("");
     try {
       const response = await fetch("/api/auth/register", {
         method: "POST",
-        //POST = we are sending data
-        headers: {
-          "Content-Type": "application/json",
-          // tells the server we're sending JSON
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
-        // JSON.stringify converts JS object to JSON string
-        // { email, password } = shorthand for
-        // { email: email, password: password }
       });
-
       const data = await response.json();
-      //parse the response body as json
-      //data = whatever our API returned
-
       if (!response.ok) {
-        //response.ok = true if status is 200-299
-        // false if status is 400,409,500 etc
-
-        setError(data.error || "something went wrong");
+        setError(data.error || "Something went wrong");
         return;
-        // return = stop here, don't continue
       }
-
-      // success — go to verify page
-      // pass email as query param so verify page knows
-      // which email to verify
-
       router.push(`/verify?email=${encodeURIComponent(email)}`);
-      // encodeURIComponent = makes email safe for URL
-      // e.g., "john@example.com" → "john%40example.com"
-    } catch (error) {
+    } catch {
       setError("Network error. Please try again.");
-      // this catches if fetch itself fails
-      // e.g., no internet connection
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex justify-center items-center bg-gray-50 min-h-screen">
-      <Card className="w-full max-w-md">
-        {/* max-w-md = maximum width of 448 */}
-        {/* w-full = take full width up to max-w-md  */}
+    <div
+      className="relative flex justify-center items-center min-h-screen overflow-hidden"
+      style={{
+        background:
+          "linear-gradient(135deg, #EEEDFE 0%, #ffffff 50%, #AFA9EC 100%)",
+      }}
+    >
+      {/* decorative blobs */}
+      <div
+        className="top-[-80px] left-[-80px] absolute opacity-20 rounded-full w-72 h-72"
+        style={{ background: "#7F77DD" }}
+      />
+      <div
+        className="right-[-60px] bottom-[-60px] absolute opacity-15 rounded-full w-56 h-56"
+        style={{ background: "#534AB7" }}
+      />
 
-        <CardHeader>
-          <CardTitle className="text-2xl"> Create an account </CardTitle>
-          <CardDescription>
-            Enter your email and password to register
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* space-y-4 = vertical gap between children */}
-            {/* onSubmit = calls handleSubmit when form submitted */}
+      <div className="z-10 relative px-4 w-full max-w-md">
+        {/* logo */}
+        <div className="mb-8 text-center">
+          <div
+            className="inline-flex justify-center items-center mb-4 rounded-2xl w-16 h-16"
+            style={{ background: "#7F77DD" }}
+          >
+            <span className="font-bold text-white text-2xl">A</span>
+          </div>
+          <h1 className="font-bold text-3xl" style={{ color: "#26215C" }}>
+            Create account
+          </h1>
+          <p className="mt-1 text-sm" style={{ color: "#534AB7" }}>
+            Join us today — it's free
+          </p>
+        </div>
 
-            {/* Email field  */}
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              {/* htmlFor links label to input with same id */}
-              {/* clicking label focuses the input */}
-
+        {/* card */}
+        <div
+          className="shadow-lg p-8 rounded-2xl"
+          style={{
+            background: "rgba(255,255,255,0.85)",
+            backdropFilter: "blur(12px)",
+            border: "1px solid #CECBF6",
+          }}
+        >
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-1.5">
+              <Label htmlFor="email" style={{ color: "#3C3489" }}>
+                Email address
+              </Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="john@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value.toLowerCase())}
-                // e.target.value = what user typed
-                // setEmail updates our state
                 required
+                style={{ borderColor: "#AFA9EC", borderRadius: "10px" }}
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="password" style={{ color: "#3C3489" }}>
+                Password
+              </Label>
               <Input
                 id="password"
                 type="password"
-                // type="password" = hides characters as dots
                 placeholder="Min 6 characters"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                style={{ borderColor: "#AFA9EC", borderRadius: "10px" }}
               />
             </div>
 
-            {/* error message */}
             {error && (
-              <p className="text-red-500 text-sm">{error}</p>
-              // only shows if error is not empty string
-              // {error && (...)} = "if error exists, show this"
+              <div
+                className="p-3 rounded-lg text-sm"
+                style={{
+                  background: "#FCEBEB",
+                  color: "#A32D2D",
+                  border: "1px solid #F7C1C1",
+                }}
+              >
+                {error}
+              </div>
             )}
 
-            {/* SUBMIT BUTTON */}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Creating account..." : "Register"}
-              {/* show different text based on loading state */}
+            <Button
+              type="submit"
+              className="rounded-xl w-full h-11 font-semibold text-white"
+              disabled={loading}
+              style={{
+                background: loading ? "#AFA9EC" : "#7F77DD",
+                border: "none",
+              }}
+            >
+              {loading ? "Creating account..." : "Create account"}
             </Button>
-
-            {/* LINK TO LOGIN */}
-            <p className="text-gray-600 text-sm text-center">
-              Already have an account?{" "}
-              <a href="/login" className="text-blue-600 hover:underline">
-                Login
-              </a>
-            </p>
           </form>
-        </CardContent>
-      </Card>
+
+          <p className="mt-6 text-sm text-center" style={{ color: "#534AB7" }}>
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              className="font-semibold hover:underline"
+              style={{ color: "#3C3489" }}
+            >
+              Sign in
+            </Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
-};
-
-export default RegisterPage;
+}
