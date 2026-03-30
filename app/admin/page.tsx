@@ -1,20 +1,41 @@
-// app/admin/page.tsx
-import { getCurrentUser } from "@/lib/auth";
+"use client";
 
-export default async function AdminPage() {
-  const user = await getCurrentUser();
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+export default function AdminPage() {
+  const router = useRouter();
 
   return (
-    <div className="p-8">
-      <h1 className="mb-4 font-bold text-2xl">Admin Panel</h1>
-      <p className="text-gray-600">Only admins can see this.</p>
-
-      {user && (
-        <div className="bg-red-100 mt-4 p-4 rounded">
-          <p>Email: {user.email}</p>
-          <p>Role: {user.role}</p>
+    <div className="bg-gray-50 p-8 min-h-screen">
+      <div className="space-y-6 mx-auto max-w-2xl">
+        <div className="flex justify-between items-center">
+          <h1 className="font-bold text-red-600 text-3xl">Admin Panel</h1>
+          <Button variant="outline" onClick={() => router.push("/dashboard")}>
+            Back to Dashboard
+          </Button>
         </div>
-      )}
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Admin Access</CardTitle>
+            <CardDescription>You have admin privileges</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-600">
+              This page is only visible to users with the ADMIN role. Regular
+              users are redirected to the dashboard by the proxy.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
